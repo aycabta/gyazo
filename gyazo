@@ -12,7 +12,7 @@ path = `scrot -s '#{scheme}' -e 'mv $f #{location}$f; echo -n #{location}$f'`
 abort("Did not capture screenshot") unless path != ""
 
 
-c = Curl::Easy.new("http://xx.gyazo.com/upload.cgi")
+c = Curl::Easy.new("http://gyazo.com/upload.cgi")
 c.multipart_form_post = true
 
 c.on_success do | data |
