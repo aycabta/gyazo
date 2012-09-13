@@ -8,3 +8,4 @@
 - Replaced net/http with curl because net/http is ugly.
 - Archives user images in chosen folder
 - Does not support proxies. This will be remedied if I ever get to it.
+- Does not use IDs the way the original did. This one needs to be fixed soon.
