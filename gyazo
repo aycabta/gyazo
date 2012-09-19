@@ -7,15 +7,32 @@ clipcmd = "echo -n %s | xclip -selection clipboard"
 
 scheme = '%Y-%m-%d-%s.png'
 location = '~/images/'
+idfile = ENV['HOME'] + '/.gyazo.id'
+idbak = idfile + Time.new.strftime("_%Y%m%d%H%M%S.bak")
+id = File.exist?(idfile) ? File.read(idfile).chomp : ''
 
 path = `scrot -s '#{scheme}' -e 'mv $f #{location}$f; echo -n #{location}$f'`
 abort("Did not capture screenshot") unless path != ""
 
-
+# upload to gyazo website
 c = Curl::Easy.new("http://gyazo.com/upload.cgi")
 c.multipart_form_post = true
 
 c.on_success do | data |
+  # save id
+  data.header_str.split("\r\n").each do | header_str |
+    header_arr = header_str.split(": ")
+    newid = header_arr[1]
+    
+    next if header_arr[0] != "X-Gyazo-Id" # next if not X-Gyazo-Id
+    break if newid == "" # break if no id
+
+    Dir.mkdir(File.dirname(idfile)) if !File.exist?(File.dirname(idfile))
+    File.rename(idfile, idbak) if File.exist?(idfile)
+    File.open(idfile, 'w') { | f | f.write(newid) }
+  end
+
+  # copy to clipboard and open in browser
   system "#{clipcmd % [data.body_str]}"
   system "#{browser} '#{data.body_str}' >/dev/null 2>&1"
 end
@@ -26,4 +43,6 @@ c.on_failure do | data |
   puts data.methods.sort # temporary
 end
 
-c.http_post(Curl::PostField.file('imagedata', "#{path}"))
+c.http_post(Curl::PostField.content('id', id),
+  Curl::PostField.file('imagedata', path, emote_file_name = 'gyazo.com'))
+
