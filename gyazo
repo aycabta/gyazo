@@ -13,7 +13,7 @@ abort("set location to your liking. #{location} not found.") \
 
 proxy_url = '' # example: http://<user>:<password>@<ipaddr>:<port>
 
-idfile = ENV['HOME'] + '/.gyazo.id'
+idfile = "#{ENV['HOME']}/.gyazo.id"
 idbak = idfile + Time.new.strftime("_%Y%m%d%H%M%S.bak")
 id = File.exist?(idfile) ? File.read(idfile).chomp : ''
 
