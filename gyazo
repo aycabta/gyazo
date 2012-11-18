@@ -8,8 +8,7 @@ location = "#{ENV['HOME']}/images/"
 abort("set location to your liking. #{location} not found.") \
   unless Dir.exist?(location)
 
-
-# proxy_url = '' # example: http://<user>:<password>@<ipaddr>:<port>
+proxy_url = '' # example: http://<user>:<password>@<ipaddr>:<port>
 
 idfile = "#{ENV['HOME']}/.gyazo.id"
 idbak = idfile + Time.new.strftime("_%Y%m%d%H%M%S.bak")
@@ -19,10 +18,13 @@ path = `scrot -s '#{scheme}' -e 'mv $f #{location}$f; echo -n #{location}$f'`
 abort("Did not capture screenshot") unless path != ""
 
 # upload to gyazo website
-data = `curl -i -s -X POST gyazo.com/upload.cgi \
-          -F 'name=#{id}' \
-          -F 'imagedata=@#{path}' \
-          -F 'filename=gyazo.com'`
+curl = "curl -i -s -X POST gyazo.com/upload.cgi "
+curl << "-x #{proxy_url} " unless proxy_url == ''
+curl << "-F 'name=#{id}' "
+curl << "-F 'imagedata=@#{path}' "
+curl << "-F 'filename=gyazo.com' "
+
+data = `#{curl}`
 
 data.split("\r\n").each do | header_str |
   header_arr = header_str.split(": ")
