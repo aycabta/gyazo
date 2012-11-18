@@ -1,6 +1,4 @@
 #!/usr/bin/env ruby
-require 'rubygems'
-require 'curb'
 
 browser = ENV['BROWSER'] ? ENV['BROWSER'] : 'xdg-open'
 clipcmd = "echo -n %s | xclip -selection clipboard"
@@ -11,7 +9,7 @@ abort("set location to your liking. #{location} not found.") \
   unless Dir.exist?(location)
 
 
-proxy_url = '' # example: http://<user>:<password>@<ipaddr>:<port>
+# proxy_url = '' # example: http://<user>:<password>@<ipaddr>:<port>
 
 idfile = "#{ENV['HOME']}/.gyazo.id"
 idbak = idfile + Time.new.strftime("_%Y%m%d%H%M%S.bak")
@@ -21,35 +19,23 @@ path = `scrot -s '#{scheme}' -e 'mv $f #{location}$f; echo -n #{location}$f'`
 abort("Did not capture screenshot") unless path != ""
 
 # upload to gyazo website
-c = Curl::Easy.new("http://gyazo.com/upload.cgi")
-c.multipart_form_post = true
-c.proxy_url = proxy_url
+data = `curl -i -s -X POST gyazo.com/upload.cgi \
+          -F 'name=#{id}' \
+          -F 'imagedata=@#{path}' \
+          -F 'filename=gyazo.com'`
 
-c.on_success do | data |
-  # save id
-  data.header_str.split("\r\n").each do | header_str |
-    header_arr = header_str.split(": ")
-    newid = header_arr[1]
-    
-    next if header_arr[0] != "X-Gyazo-Id" # next if not X-Gyazo-Id
-    break if newid == "" # break if no id
+data.split("\r\n").each do | header_str |
+  header_arr = header_str.split(": ")
+  next if header_arr[0] != "X-Gyazo-Id" # next if not X-Gyazo-Id
+  
+  newid = header_arr[1]
+  break if newid == "" # break if no id
 
-    Dir.mkdir(File.dirname(idfile)) if !File.exist?(File.dirname(idfile))
-    File.rename(idfile, idbak) if File.exist?(idfile)
-    File.open(idfile, 'w') { | f | f.write(newid) }
-  end
-
-  # copy to clipboard and open in browser
-  system "#{clipcmd % [data.body_str]}"
-  system "#{browser} '#{data.body_str}' >/dev/null 2>&1"
+  Dir.mkdir(File.dirname(idfile)) if !File.exist?(File.dirname(idfile))
+  File.rename(idfile, idbak) if File.exist?(idfile)
+  File.open(idfile, 'w') { | f | f.write(newid) }
 end
 
-c.on_failure do | data |
-  # will update next time gyazo is down.
-  # if anyone is using this, feel free to submit a pull request
-  puts data.methods.sort # temporary
-end
-
-c.http_post(Curl::PostField.content('id', id),
-  Curl::PostField.file('imagedata', path, emote_file_name = 'gyazo.com'))
-
+# copy to clipboard and open in browser
+system %(#{clipcmd % [data.split("\r\n\r\n")[-1]]})
+system %(#{browser} '#{data.split("\r\n\r\n")[-1]}' >/dev/null 2>&1)
