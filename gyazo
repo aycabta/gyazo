@@ -6,7 +6,10 @@ browser = ENV['BROWSER'] ? ENV['BROWSER'] : 'xdg-open'
 clipcmd = "echo -n %s | xclip -selection clipboard"
 
 scheme = '%Y-%m-%d-%s.png'
-location = '~/images/'
+location = "#{ENV['HOME']}/images/"
+abort("set location to your liking. #{location} not found.") \
+  unless Dir.exist?(location)
+
 
 proxy_url = '' # example: http://<user>:<password>@<ipaddr>:<port>
 
