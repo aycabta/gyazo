@@ -18,11 +18,11 @@ path = `scrot -s '#{scheme}' -e 'mv $f #{location}$f; echo -n #{location}$f'`
 abort("Did not capture screenshot") unless path != ""
 
 # upload to gyazo website
-curl = "curl -i -s -X POST gyazo.com/upload.cgi "
-curl << "-x #{proxy_url} " unless proxy_url == ''
-curl << "-F 'name=#{id}' "
-curl << "-F 'imagedata=@#{path}' "
-curl << "-F 'filename=gyazo.com' "
+curl = "curl -i -s -X POST gyazo.com/upload.cgi "\
+        "-F 'id=#{id}' " \
+        "-F 'imagedata=@#{path}' " \
+        "-F 'filename=gyazo.com' " \
+        "-x #{proxy_url.empty? ? "''" : proxy_url}"
 
 data = `#{curl}`
 
