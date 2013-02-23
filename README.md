@@ -2,8 +2,7 @@
 
 ## Changes
 - Threw out the old script and burned it.
-- Replaced ImageMagick with scrot
+- Replaced ImageMagick with the much lighter scrot
     - Fixes of an issue with windows behind target windows appearing in image
-    - No longer requires the heavy ImageMagick
 - Replaced net/http by just executing curl
 - Archives user images in chosen folder
