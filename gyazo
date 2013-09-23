@@ -5,17 +5,17 @@ require 'fileutils'
 browser = ENV['BROWSER'] ? ENV['BROWSER'] : 'xdg-open'
 clipcmd = "echo -n %s | xclip -selection clipboard"
 
+scheme = '%Y-%m-%d-%s.png'
+location = "#{ENV['HOME']}/images/"
+abort("set location to your liking. #{location} not found.") \
+  unless Dir.exist?(location)
+
 proxy_url = ENV['http_proxy'] ? ENV['http_proxy'] : ''
 # proxy example: http://<user>:<password>@<ipaddr>:<port>
 
 idfile = "#{ENV['HOME']}/.gyazo.id"
 idbak = idfile + Time.new.strftime("_%Y%m%d%H%M%S.bak")
 id = File.exist?(idfile) ? File.read(idfile).chomp : ''
-
-scheme = '%Y-%m-%d-%s.png'
-location = "#{ENV['HOME']}/images/"
-abort("set location to your liking. #{location} not found.") \
-  unless Dir.exist?(location)
 
 if ARGV.size > 0
   abort("#{ARGV[0]} not found") unless File.exist?(ARGV[0])
