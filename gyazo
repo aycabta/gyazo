@@ -3,11 +3,6 @@
 browser = ENV['BROWSER'] ? ENV['BROWSER'] : 'xdg-open'
 clipcmd = "echo -n %s | xclip -selection clipboard"
 
-scheme = '%Y-%m-%d-%s.png'
-location = "#{ENV['HOME']}/images/"
-abort("set location to your liking. #{location} not found.") \
-  unless Dir.exist?(location)
-
 proxy_url = ENV['http_proxy'] ? ENV['http_proxy'] : ''
 # proxy example: http://<user>:<password>@<ipaddr>:<port>
 
@@ -15,8 +10,21 @@ idfile = "#{ENV['HOME']}/.gyazo.id"
 idbak = idfile + Time.new.strftime("_%Y%m%d%H%M%S.bak")
 id = File.exist?(idfile) ? File.read(idfile).chomp : ''
 
-path = `scrot -s '#{scheme}' -e 'mv $f #{location}$f; echo -n #{location}$f'`
-abort("Did not capture screenshot") unless path != ""
+if ARGV.size > 0
+  if File.exist?(ARGV[0])
+    path = ARGV[0]
+  else
+    abort("#{ARGV[0]} not found")
+  end
+else
+  scheme = '%Y-%m-%d-%s.png'
+  location = "#{ENV['HOME']}/images/"
+  abort("set location to your liking. #{location} not found.") \
+    unless Dir.exist?(location)
+
+  path = `scrot -s '#{scheme}' -e 'mv $f #{location}$f; echo -n #{location}$f'`
+  abort("Did not capture screenshot") unless path != ""
+end
 
 # upload to gyazo website
 curl = "curl -i -s -X POST gyazo.com/upload.cgi "\
