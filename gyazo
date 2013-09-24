@@ -19,7 +19,10 @@ id = File.exist?(idfile) ? File.read(idfile).chomp : ''
 
 if ARGV.size > 0
   abort("#{ARGV[0]} not found") unless File.exist?(ARGV[0])
-  path = "#{location}#{Time.now.strftime(scheme)}".gsub!(/\.png$/, File.extname(ARGV[0]))
+  create_path = proc { "#{location}#{Time.now.strftime(scheme)}".gsub!(/\.png$/, File.extname(ARGV[0])) }
+  while File.exist?(path = create_path.call())
+    sleep 1
+  end
   FileUtils.cp(ARGV[0], path)
 else
   path = `scrot -s '#{scheme}' -e 'mv $f #{location}$f; echo -n #{location}$f'`
